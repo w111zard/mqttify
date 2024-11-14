@@ -15,7 +15,7 @@ function validateCommands(commands) {
 
   for (const command of commands) {
     const keys = Object.keys(command);
-    if (keys.length !== 2) {
+    if (keys.length !== 3) {
       throw new Error('Invalid commands format');
     }
     if (!command.topic || !command.message) {
@@ -25,8 +25,14 @@ function validateCommands(commands) {
 }
 
 function publishNextCommand(commands, client) {
-  console.log('Publishing next command...');
   const nextCommand = commands.shift();
+
+  if (nextCommand.description) {
+    console.log(`Publishing next command: "${nextCommand.description}" ...`);
+  } else {
+    console.log('Publishing next command...');
+  }
+
   client.publish(nextCommand.topic, nextCommand.message);
 
   if (!commands.length) {
