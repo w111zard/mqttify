@@ -28,6 +28,11 @@ function publishNextCommand(commands, client) {
   console.log('Publishing next command...');
   const nextCommand = commands.shift();
   client.publish(nextCommand.topic, nextCommand.message);
+
+  if (!commands.length) {
+    console.log('Exiting...');
+    process.exit(0);
+  }
 }
 
 
@@ -47,7 +52,7 @@ async function start(file) {
     validateCommands(commands);
 
     const onKeypress = (chunk, key) => {
-      if (key === 'q' || !commands.length) {
+      if (key === 'q') {
         console.log('Exiting...');
         return process.exit(0);
       }
