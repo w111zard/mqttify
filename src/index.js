@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const MqttClient = require('./utils/mqtt-client');
 const InputHandler = require('./utils/input-handler');
 const FileSystem = require('./utils/file-system');
