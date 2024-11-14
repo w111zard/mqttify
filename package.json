@@ -1,0 +1,25 @@
+{
+  "name": "mqttify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/w111zard/mqttify.git"
+  },
+  "keywords": [
+    "mqtt"
+  ],
+  "author": "Denis Golosko",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/w111zard/mqttify/issues"
+  },
+  "homepage": "https://github.com/w111zard/mqttify#readme",
+  "devDependencies": {
+    "eslint": "^8.57.1"
+  }
+}
