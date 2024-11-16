@@ -1,78 +1,26 @@
 #!/usr/bin/env node
 
-const MqttClient = require('./utils/mqtt-client');
-const InputHandler = require('./utils/input-handler');
-const FileSystem = require('./utils/file-system');
+const { Command } = require('commander');
 
-function validateCommands(commands) {
-  if (!Array.isArray(commands)) {
-    throw new Error('Commands must be in an array');
-  }
+async function start() {
+  const program = new Command();
 
-  if (!commands.length) {
-    throw new Error('There is no commands in file');
-  }
+  program
+    .name('mqttify')
+    .description('Send MQTT messages interactively')
+    .version('1.0.0');
 
-  for (const command of commands) {
-    const keys = Object.keys(command);
-    if (keys.length !== 3) {
-      throw new Error('Invalid commands format');
-    }
-    if (!command.topic || !command.message) {
-      throw new Error('Invalid commands format');
-    }
-  }
+  program
+    .option('-h, --host <string>', 'hostname')
+    .option('-p, --port <number>', 'port')
+    .option('-P, --protocol <string>', 'protocol')
+    .option('-u, --username <string>', 'username')
+    .option('-a, --password <string>', 'password');
+
+  program.parse();
+  const options = program.opts();
+  console.log(program.args);
+  console.log(options);
 }
 
-function publishNextCommand(commands, client) {
-  const nextCommand = commands.shift();
-
-  if (nextCommand.description) {
-    console.log(`Publishing next command: "${nextCommand.description}" ...`);
-  } else {
-    console.log('Publishing next command...');
-  }
-
-  client.publish(nextCommand.topic, nextCommand.message);
-
-  if (!commands.length) {
-    console.log('Exiting...');
-    process.exit(0);
-  }
-}
-
-
-async function start(file) {
-  if (!file) {
-    console.log('Use: mqttfiy <file>');
-    process.exit(1);
-  }
-
-  const client = new MqttClient('mqtt://localhost');
-  const input = new InputHandler();
-
-  try {
-    await client.connect();
-
-    const commands = await FileSystem.readFile(file);
-    validateCommands(commands);
-
-    const onKeypress = (chunk, key) => {
-      if (key === 'q') {
-        console.log('Exiting...');
-        return process.exit(0);
-      }
-
-      publishNextCommand(commands, client);
-    };
-
-    input.setHandler(onKeypress);
-
-    publishNextCommand(commands, client);
-  } catch (error) {
-    console.log(error.message);
-    process.exit(1);
-  }
-}
-
-start(process.argv[2]);
+start();
