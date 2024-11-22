@@ -1,3 +1,10 @@
 #!/usr/bin/env node
 
-console.log('Hello, World');
+import App from './app';
+
+async function bootstrap() {
+    const app = new App();
+    await app.start();
+}
+
+bootstrap();
