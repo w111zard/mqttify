@@ -1,6 +1,12 @@
+import Config from "./interfaces/config";
+
 class App {
-    async start() {
-        console.log('Starting app');
+    constructor(
+        private readonly config: Config
+    ) {}
+
+    async start(): Promise<void> {
+        await this.config.load();
     }
 }
 
