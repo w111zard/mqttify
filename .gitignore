@@ -2,3 +2,4 @@
 node_modules
 dist
 .mqttify.json
+_test

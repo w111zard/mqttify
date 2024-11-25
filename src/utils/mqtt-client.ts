@@ -23,6 +23,14 @@ class MqttClient implements Client {
     publish(topic: string, data: object): void {
         this.client.publish(topic, JSON.stringify(data));
     }
+
+    disconnect(): Promise<void> {
+        return new Promise((resolve) => {
+            this.client.end(() => {
+                resolve();
+            });
+        });
+    }
 }
 
 export default MqttClient;

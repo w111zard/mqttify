@@ -24,12 +24,14 @@
   "homepage": "https://github.com/w111zard/mqttify#readme",
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@types/prompts": "^2.4.9",
     "eslint": "^8.57.1",
     "globals": "^15.12.0",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0"
   },
   "dependencies": {
-    "mqtt": "^5.10.2"
+    "mqtt": "^5.10.2",
+    "prompts": "^2.4.2"
   }
 }
