@@ -3,6 +3,7 @@ import path from 'path';
 import prompts from 'prompts';
 import Client from "./interfaces/client";
 import RequestGroup from "./utils/requests-group";
+import RequestsGroup from "./utils/requests-group";
 
 class App {
     private readonly groups: RequestGroup[];
@@ -51,7 +52,51 @@ class App {
             choices
         });
 
-        console.log(selected);
+        if (this.isEmptyObject(selected)) {
+            return await this.stop();
+        }
+
+        await this.showRequests(selected.value);
+    }
+
+    private async showRequests(group: RequestsGroup, index: number = 0) {
+        console.clear();
+
+        const choices = group.requests.map(r => ({ title: r.name, value: r }));
+
+        const selected = await prompts({
+            type: 'select',
+            name: 'value',
+            message: 'Pick a request',
+            choices,
+            initial: index
+        }, {
+            onCancel: prompt => {
+                console.log('Canceled');
+            },
+
+        });
+
+        if (this.isEmptyObject(selected)) {
+            return await this.stop();
+        }
+
+        const request = selected.value;
+        this.client.publish(request.topic, request.data);
+
+        const nextIndex = index + 1 < group.requests.length ? index + 1 : 0;
+        await this.showRequests(group, nextIndex);
+    }
+
+    private isEmptyObject(obj: object) {
+        return Object.keys(obj).length === 0;
+    }
+
+    async stop() {
+        // console.clear();
+        // console.log('Bye bye');
+        // await this.client.disconnect();
+        // process.exit(0);
     }
 }
 
