@@ -1,12 +1,14 @@
 import Config from "./interfaces/config";
+import Client from "./interfaces/client";
 
 class App {
     constructor(
-        private readonly config: Config
+        private readonly client: Client,
     ) {}
 
     async start(): Promise<void> {
-        await this.config.load();
+        await this.client.connect();
+        console.log('Connected');
     }
 }
 
