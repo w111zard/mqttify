@@ -24,16 +24,20 @@ class App {
     }
 
     private async loadAll() {
-        const dir = '_test';
+        const dir = process.cwd();
 
-        const files = await fs.readdir('_test');
+        const files = await fs.readdir(dir);
         const jsonFiles = files.filter(file => file.endsWith('.json'));
-
 
         const filesRawData = await Promise.all(jsonFiles.map(file => fs.readFile(path.join(dir, file), 'utf-8')));
         const groups = filesRawData.map(data => JSON.parse(data));
 
-        for (const group of groups) {
+        const validGroups = groups.filter(group => RequestsGroup.isRequestGroup(group));
+        if (!validGroups.length) {
+            await this.stop('There are no valid groups');
+        }
+
+        for (const group of validGroups) {
             const requestGroup = new RequestGroup(group.name);
             for (const request of group.requests) {
                 requestGroup.addRequest(request);
@@ -50,11 +54,11 @@ class App {
             name: 'value',
             message: 'Pick a group',
             choices
+        }, {
+            onCancel: async () => {
+                return await this.stop();
+            }
         });
-
-        if (this.isEmptyObject(selected)) {
-            return await this.stop();
-        }
 
         await this.showRequests(selected.value);
     }
@@ -69,17 +73,12 @@ class App {
             name: 'value',
             message: 'Pick a request',
             choices,
-            initial: index
+            initial: index,
         }, {
-            onCancel: prompt => {
-                console.log('Canceled');
-            },
-
+            onCancel: async () => {
+                return await this.stop();
+            }
         });
-
-        if (this.isEmptyObject(selected)) {
-            return await this.stop();
-        }
 
         const request = selected.value;
         this.client.publish(request.topic, request.data);
@@ -88,15 +87,12 @@ class App {
         await this.showRequests(group, nextIndex);
     }
 
-    private isEmptyObject(obj: object) {
-        return Object.keys(obj).length === 0;
-    }
-
-    async stop() {
-        // console.clear();
-        // console.log('Bye bye');
-        // await this.client.disconnect();
-        // process.exit(0);
+    async stop(message?: string) {
+        console.clear();
+        if (message) console.log(message);
+        console.log('Bye bye');
+        await this.client.disconnect();
+        process.exit(0);
     }
 }
 
