@@ -1,25 +1,28 @@
-import prompts from 'prompts';
 import Client from "./interfaces/client";
 import RequestGroup from "./utils/requests-group";
-import RequestsGroup from "./utils/requests-group";
 import System from "./utils/system";
+import Graphics from "./utils/graphics";
+import Operation from "./utils/operation";
+import Request from "./utils/request";
 
 class App {
     private readonly groups: RequestGroup[];
+    private readonly history: Operation[];
 
     constructor(
         private readonly client: Client,
     ) {
         this.groups = [];
+        this.history = [];
     }
 
     async start(): Promise<void> {
         await this.client.connect();
         await this.loadAll();
 
-        await this.showGroups();
-
-        await this.client.disconnect();
+        const g = new Graphics(this.groups, this.history);
+        g.on('send', this.sendRequest.bind(this));
+        g.renderMainScreen();
     }
 
     private async loadAll() {
@@ -40,46 +43,8 @@ class App {
         }
     }
 
-    private async showGroups() {
-        const choices = this.groups.map(g => ({ title: g.name, value: g }));
-
-        console.clear();
-        const selected = await prompts({
-            type: 'select',
-            name: 'value',
-            message: 'Pick a group',
-            choices
-        }, {
-            onCancel: async () => {
-                return await this.stop();
-            }
-        });
-
-        await this.showRequests(selected.value);
-    }
-
-    private async showRequests(group: RequestsGroup, index: number = 0): Promise<void> {
-        console.clear();
-
-        const choices = group.requests.map(r => ({ title: r.name, value: r }));
-
-        const selected = await prompts({
-            type: 'select',
-            name: 'value',
-            message: 'Pick a request',
-            choices,
-            initial: index,
-        }, {
-            onCancel: async () => {
-                return await this.showGroups();
-            }
-        });
-
-        const request = selected.value;
+    async sendRequest(request: Request) {
         this.client.publish(request.topic, request.data);
-
-        const nextIndex = index + 1 < group.requests.length ? index + 1 : 0;
-        return await this.showRequests(group, nextIndex);
     }
 
     async stop(message?: string) {
